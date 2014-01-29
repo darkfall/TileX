@@ -30,13 +30,16 @@ class TileMapInspector: Editor {
 
 		GUILayout.BeginHorizontal();
 		if(GUILayout.Button("Add Tile Layer")) {
-			Undo.RegisterCreatedObjectUndo(tm.addLayer(LayerType.TileLayer, "Layer " + tm.layers.Length.ToString()).gameObject, "Layer");
+			Undo.RegisterCreatedObjectUndo(tm.AddLayer(TileLayerType.TileLayer, "Layer " + tm.layers.Count.ToString()).gameObject, "Layer");
 			this.Repaint();
 		}
-		if(GUILayout.Button("Add Object Layer" )) {
-			Undo.RegisterCreatedObjectUndo(tm.addLayer(LayerType.ObjectLayer, "Layer " + tm.layers.Length.ToString()).gameObject, "Tile");
+		//GUILayout.Button("Add Object Layer", "button off");
+		/*
+		if() {
+			Undo.RegisterCreatedObjectUndo(tm.AddLayer(TileLayerType.ObjectLayer, "Layer " + tm.layers.Count.ToString()).gameObject, "Tile");
 			this.Repaint();
 		}
+		*/
 		GUILayout.EndHorizontal();
 
 		TileLayer layerToRemove = null;
@@ -47,91 +50,9 @@ class TileMapInspector: Editor {
 			TextAnchor.MiddleLeft,
 			() => {
 				
-
-
 			},
 			(index, is_selection) => {
-				TileLayer layer = tm.layers[index];
-
-				GUILayout.BeginHorizontal();
-			    layer.visible = GUILayout.Toggle(layer.visible, "", GUILayout.Width(12));
-				bool selection = GUILayout.Button(layer.name + " (" + layer.layerType.ToString() + ")",
-			                                  	  is_selection ? TileGUIUtility.listEntryFocused : TileGUIUtility.listEntryNormal);
-				GUILayout.EndHorizontal();
-				layer.transparency = EditorGUILayout.Slider("Transparency", layer.transparency, 0f, 1f);
-
-				layer.sortingLayer = EditorGUILayout.Popup("Sorting Layer", layer.sortingLayer, TileGUIUtility.GetSortingLayerNames());
-				layer.sortingOrder = EditorGUILayout.IntField("Sorting Order", layer.sortingOrder);
-
-				EditorGUILayout.Space();
-				layer.layerGroup = EditorGUILayout.IntField("Group Id", layer.layerGroup);
-				layer.layerTag = EditorGUILayout.TextField("Layer Tag", layer.layerTag);
-
-			
-				TileMapEditor editor = TileMapEditor.Get ();
-				if(editor.selectedTileSetIndex != -1 &&
-			   		editor.selectedTileX != -1 && editor.selectedTileY != -1) {
-				Tileset ts = tm.tilesets[editor.selectedTileSetIndex];
-				TileInfo ti = ts.getTileInfo(editor.selectedTileX, editor.selectedTileY);
-				
-				EditorGUILayout.BeginHorizontal();
-				if(ti != null) {
-					if(GUILayout.Button("Fill with Current Tile", GUILayout.Width(200))) {
-						int rows = tm.mapHeight / tm.tileHeight;
-						int columns = tm.mapWidth / tm.tileWidth;
-						for(int i=0; i<rows; ++i) {
-							for(int j=0; j<columns; ++j) {
-								layer.addTile(j, i, ti);
-							}
-						}
-					}
-				} else {
-					GUILayout.Button("Fill with Current Tile", "button off", GUILayout.Width(200));
-				}
-				if(GUILayout.Button("Mark")) {
-					markedSprite = ti.sprite;
-				}
-				if(markedSprite != null) {
-					if(GUILayout.Button ("Replace")) {
-						for(int y=0; y<tm.height; y++) {
-							for(int x=0; x<tm.width; x++) {
-								Tile t = layer.getTile(x, y);
-								Sprite tileSpr = t.GetComponent<SpriteRenderer>().sprite;
-								if(tileSpr.texture == markedSprite.texture &&
-								   tileSpr.textureRect == markedSprite.textureRect) {
-									t.gameObject.GetComponent<SpriteRenderer>().sprite = ti.sprite;
-								}
-							}
-						}
-						markedSprite = null;
-					}
-				}
-				EditorGUILayout.EndHorizontal();
-
-				}
-
-				
-				
-				GUILayout.BeginHorizontal();
-
-				GUILayout.FlexibleSpace();
-				if(GUILayout.Button("Reset", GUILayout.Width(64))) {
-					layer.ResetLayer();	
-				}
-				if(GUILayout.Button("Copy as New", GUILayout.Width(120))) {
-					layerToCopy = layer;
-				}
-				
-				if(GUILayout.Button("Remove", GUILayout.Width(64))) {
-					layerToRemove = layer;
-				}
-				
-				GUILayout.EndHorizontal();
-				Rect r = GUILayoutUtility.GetLastRect();
-				EditorGUILayout.Space();
-				GUI.Box (new Rect((Screen.width - r.width) / 2 + 1, r.y + r.height + 8f, r.width + 5f, 1), "");
-
-				return selection;
+				return DrawLayerInspector(index, is_selection, ref layerToCopy, ref layerToRemove);
 			}
 
 		);
@@ -139,10 +60,10 @@ class TileMapInspector: Editor {
 			tm.RemoveLayer(layerToRemove);
 		}
 		if(layerToCopy != null) {
-			TileLayer layer = tm.addLayer(LayerType.TileLayer, layerToCopy.name + " Copied");
+			TileLayer layer = tm.AddLayer(TileLayerType.TileLayer, layerToCopy.name + " Copied");
 			for(int y=0; y<tm.height; y++) {
 				for(int x=0; x<tm.width; x++) {
-					Tile t = layerToCopy.getTile(x, y);
+					Tile t = layerToCopy.GetTile(x, y);
 					TileInfo ti = new TileInfo();
 					ti.sprite = t.gameObject.GetComponent<SpriteRenderer>().sprite;
 					ti.attributes = t.attributes;
@@ -154,14 +75,93 @@ class TileMapInspector: Editor {
 					ti.isBlock = t.isBlock;
 					ti.editorExpanded = false;
 
-					layer.addTile(x, y, ti);	
+					layer.AddTile(x, y, ti);	
 				}
 			}
 
 		}
 
 		EditorGUILayout.EndVertical();
+	}
 
+	bool DrawLayerInspector(int index, bool is_selection, ref TileLayer layerToCopy, ref TileLayer layerToRemove) {
+		TileMap tm = this.target as TileMap;
+		TileLayer layer = tm.layers[index];
+		
+		GUILayout.BeginHorizontal();
+		layer.visible = GUILayout.Toggle(layer.visible, "", GUILayout.Width(12));
+		bool selection = GUILayout.Button(layer.name + " (" + layer.layerType.ToString() + ")",
+		                                  is_selection ? TileGUIUtility.listEntryFocused : TileGUIUtility.listEntryNormal);
+		GUILayout.EndHorizontal();
+
+		layer.transparency = EditorGUILayout.Slider("Transparency", layer.transparency, 0f, 1f);
+		layer.sortingLayer = EditorGUILayout.Popup("Sorting Layer", layer.sortingLayer, TileGUIUtility.GetSortingLayerNames());
+		layer.sortingOrder = EditorGUILayout.IntField("Sorting Order", layer.sortingOrder);
+		
+		EditorGUILayout.Space();
+		layer.layerGroup = EditorGUILayout.IntField("Group Id", layer.layerGroup);
+		layer.layerTag = EditorGUILayout.TextField("Layer Tag", layer.layerTag);
+		
+		
+		TileMapEditor editor = TileMapEditor.Get ();
+		if(editor.selectedTileSetIndex != -1 &&
+		   editor.selectedTileX != -1 && editor.selectedTileY != -1) {
+			Tileset ts = tm.tilesets[editor.selectedTileSetIndex];
+			TileInfo ti = ts.GetTileInfo(editor.selectedTileX, editor.selectedTileY);
+			
+			EditorGUILayout.BeginHorizontal();
+			if(ti != null) {
+				if(GUILayout.Button("Fill with Current Tile", GUILayout.Width(200))) {
+					int rows = tm.mapHeight / tm.tileHeight;
+					int columns = tm.mapWidth / tm.tileWidth;
+					for(int i=0; i<rows; ++i) {
+						for(int j=0; j<columns; ++j) {
+							layer.AddTile(j, i, ti);
+						}
+					}
+				}
+			} else {
+				GUILayout.Button("Fill with Current Tile", "button off", GUILayout.Width(200));
+			}
+			if(GUILayout.Button("Mark")) {
+				markedSprite = ti.sprite;
+			}
+			if(markedSprite != null) {
+				if(GUILayout.Button ("Replace")) {
+					for(int y=0; y<tm.height; y++) {
+						for(int x=0; x<tm.width; x++) {
+							Tile t = layer.GetTile(x, y);
+							Sprite tileSpr = t.GetComponent<SpriteRenderer>().sprite;
+							if(tileSpr.texture == markedSprite.texture &&
+							   tileSpr.textureRect == markedSprite.textureRect) {
+								t.gameObject.GetComponent<SpriteRenderer>().sprite = ti.sprite;
+							}
+						}
+					}
+					markedSprite = null;
+				}
+			}
+			EditorGUILayout.EndHorizontal();
+		}
+
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+		if(GUILayout.Button("Reset", GUILayout.Width(64))) {
+			layer.ResetLayer();	
+		}
+		if(GUILayout.Button("Copy as New", GUILayout.Width(120))) {
+			layerToCopy = layer;
+		}
+		if(GUILayout.Button("Remove", GUILayout.Width(64))) {
+			layerToRemove = layer;
+		}
+		
+		GUILayout.EndHorizontal();
+		Rect r = GUILayoutUtility.GetLastRect();
+		EditorGUILayout.Space();
+		GUI.Box (new Rect((Screen.width - r.width) / 2 + 1, r.y + r.height + 8f, r.width + 5f, 1), "");
+		
+		return selection;
 	}
 
 	public void OnSceneGUI() {
@@ -198,7 +198,7 @@ class TileMapInspector: Editor {
 		   y >= 0 && y < rows) {
 			if(editor.selectedTileSetIndex != -1) {
 				Tileset ts = tm.tilesets[editor.selectedTileSetIndex];
-				TileInfo ti = ts.getTileInfo(editor.selectedTileX, editor.selectedTileY);
+				TileInfo ti = ts.GetTileInfo(editor.selectedTileX, editor.selectedTileY);
 				previewRenderer.sprite = ti.sprite;
 				previewRenderer.color = new Color(255, 255, 255, 0.5f);
 				previewRenderer.gameObject.transform.rotation = Quaternion.AngleAxis(ti.direction, Vector3.forward);
@@ -214,15 +214,15 @@ class TileMapInspector: Editor {
 				if(evt.type == EventType.MouseDown) {
 					if(evt.button == 0) {
 						TileLayer layer;
-						if(tm.layers.Length == 0)
-							layer = tm.addLayer(LayerType.TileLayer, "Layer 0");
+						if(tm.layers.Count == 0)
+							layer = tm.AddLayer(TileLayerType.TileLayer, "Layer 0");
 						else
 							layer = tm.layers[selectedLayerIndex];
 						if(layer != null) {
 							if(editor.isErase) {
-								layer.removeTile(x, y);
+								layer.RemoveTile(x, y);
 							} else {
-								Tile t = layer.addTile(x, y, ti);
+								Tile t = layer.AddTile(x, y, ti);
 								Undo.RegisterCreatedObjectUndo(t.gameObject, "Tile");
 							}
 						}

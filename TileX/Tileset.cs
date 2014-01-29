@@ -23,7 +23,6 @@ public class TileInfo {
 	public Sprite sprite;
 	public float  direction = 0;
 	public bool   isBlock = false;
-	public bool   isHole = false;
 	public List<TileAttribute> attributes = new List<TileAttribute>();
 
 #region editor
@@ -87,20 +86,20 @@ public class Tileset {
 		}
 	}
 
-	public bool isValidindex(int x, int y) {
+	public bool IsValidindex(int x, int y) {
 		return x >= 0 && x < this.columns &&
 			y >= 0 && y < this.rows;
 
 	}
 
-	public TileInfo getTileInfo(int x, int y) {
+	public TileInfo GetTileInfo(int x, int y) {
 		int idx = y * this.columns + x;
 		if(idx < this.tileInfos.Count)
 			return this.tileInfos[idx];
 		return null;
 	}
 
-	public Rect getTexRect(int x, int y) {
+	public Rect GetTexRect(int x, int y) {
 		return new Rect((float)x * this.tileWidth / this.texture.width,
 		                (float)y * this.tileHeight / this.texture.height,
 		                (float)(this.tileWidth) / this.texture.width,

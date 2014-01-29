@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum LayerType {
+public enum TileLayerType {
 	TileLayer,
 	ObjectLayer,
 	ImageLayer,
@@ -11,9 +11,8 @@ public enum LayerType {
 
 public class TileLayer: MonoBehaviour {
 
-	public LayerType layerType;
-	public TileMap   parentMap; 
-	public string    name = "New Layer";
+	public TileLayerType layerType;
+	public TileMap   	 parentMap; 
 
 	public int sortingOrder = 0;
 	public int sortingLayer = 0;
@@ -40,7 +39,7 @@ public class TileLayer: MonoBehaviour {
 	
 	}
 
-	public void init(int w, int h) {
+	public void Init(int w, int h) {
 		tiles = new List<GameObject>();
 		for(int i=0; i<w*h; ++i) {
 			tiles.Add(null);
@@ -64,15 +63,15 @@ public class TileLayer: MonoBehaviour {
 		}
 	}
 
-	public Tile getTile(int x, int y) {
+	public Tile GetTile(int x, int y) {
 		GameObject t = tiles[parentMap.width * y + x];
 		if(t != null)
 			return t.GetComponent<Tile>();
 		return null;
 	}
 
-	public Tile addTile(int x, int y, TileInfo ti) {
-		this.removeTile(x, y);
+	public Tile AddTile(int x, int y, TileInfo ti) {
+		this.RemoveTile(x, y);
 
 		GameObject obj = new GameObject();
 		obj.transform.parent = this.gameObject.transform;
@@ -89,7 +88,7 @@ public class TileLayer: MonoBehaviour {
 		return t;
 	}
 
-	public void removeTile(int x, int y) {
+	public void RemoveTile(int x, int y) {
 		GameObject t = this.tiles[y * parentMap.width + x];
 		if(t != null) { 
 			DestroyImmediate(t);
@@ -122,8 +121,8 @@ public class TileLayer: MonoBehaviour {
 		}
 	}
 
-	public Tile getTileAt(Vector3 pos) {
-		return this.getTile((int)Mathf.Floor((pos.x) / parentMap.xStep),
+	public Tile GetTileAt(Vector3 pos) {
+		return this.GetTile((int)Mathf.Floor((pos.x) / parentMap.xStep),
 		                    (int)Mathf.Floor((pos.y ) / parentMap.yStep));
 	}
 

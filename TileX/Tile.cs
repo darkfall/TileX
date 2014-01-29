@@ -34,17 +34,22 @@ public class Tile: MonoBehaviour {
 	public UnityEngine.Object userData; 
 
 	[SerializeField]
-	public List<TileAttribute> attributes = new List<TileAttribute>();
+	public TileInfo tileInfo;
 
-	public bool isBlock = false;
-	public bool isFloatable = false;
-	public bool isBreakable = false;
-	public bool isClimbable = false;
-	public bool isMoveable = false;
-	public bool isTunnelable = false;
+	public List<TileAttribute> attributes {
+		get {
+			return tileInfo.attributes;
+		}
+	}
 
-	public int astarScore = 0;
-	public Tile astarFrom = null;
+	public bool isBlock {
+		get {
+			return tileInfo.isBlock;
+		}
+		set {
+			tileInfo.isBlock = value;
+		}
+	}
 
 	bool _visible;
 	public bool visible {
@@ -63,25 +68,20 @@ public class Tile: MonoBehaviour {
 		this._width = (int)info.sprite.textureRect.width;
 		this._height = (int)info.sprite.textureRect.height;
 
-		this.isBlock = info.isBlock;
-
 		SpriteRenderer r = this.gameObject.GetComponent<SpriteRenderer>();
 		r.sprite = info.sprite;
 		r.sortingOrder = sortingOrder;
 		r.sortingLayerID = sortingLayer;
 
-		this.attributes = new List<TileAttribute>();
-		foreach(TileAttribute attr in info.attributes) {
-			this.attributes.Add(new TileAttribute(attr.name, attr.value));
-		}
+		this.tileInfo = info;
 	}
 
-	public void setTransparency(float a) {
+	public void SetTransparency(float a) {
 		SpriteRenderer sr = this.gameObject.GetComponent<SpriteRenderer>();
 		sr.color = new Color(255, 255, 255, a);
 	}
 
-	public string getAttribute(string key) {
+	public string GetAttribute(string key) {
 		foreach(TileAttribute attr in this.attributes) {
 			if(attr.name == key) {
 				return attr.value;

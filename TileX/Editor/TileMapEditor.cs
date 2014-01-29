@@ -6,7 +6,7 @@ class TileMapEditor: EditorWindow {
 
 	public static int TilesetActionbarHeight = 30;
 
-	public static TileMapEditor Show() {
+	public static TileMapEditor Create() {
 		return EditorWindow.GetWindow<TileMapEditor>("Tilemap Editor", true);
 	}
 	public static TileMapEditor Get() {
@@ -108,14 +108,13 @@ class TileMapEditor: EditorWindow {
 				}
 
 				{
-					if(ts.isValidindex(selectedTileX, selectedTileY)) {
+					if(ts.IsValidindex(selectedTileX, selectedTileY)) {
 						GUILayout.BeginVertical("box");
 
-						TileInfo ti = ts.getTileInfo(selectedTileX, selectedTileY);
+						TileInfo ti = ts.GetTileInfo(selectedTileX, selectedTileY);
 						GUILayout.BeginHorizontal();
 						ti.editorExpanded = EditorGUILayout.Foldout(ti.editorExpanded, "Tile Attributes");
 
-						ti.isHole = GUILayout.Toggle(ti.isHole, "Is Hole  |", GUILayout.Width(80));
 						ti.isBlock = GUILayout.Toggle(ti.isBlock, "Is Block  |", GUILayout.Width(80));
 						if(GUILayout.Button("New Attribute", "label", GUILayout.Width(80))) {
 							ti.attributes.Add (new TileAttribute("New Attribute", ""));
@@ -155,8 +154,8 @@ class TileMapEditor: EditorWindow {
 					                                             tileViewScrollPosition,
 					                                             new Rect(0, 0, this.position.width - 30f, _tileViewHeightRequired));
 
-					int xc = (int)Mathf.Floor((this.position.width - 10f) / (ts.tileWidth + 6f));
-					float startx = _tileViewHeightRequired < (this.position.height - (lr.y + lr.height)) ? (this.position.width - 10f - xc * (ts.tileWidth + 6f)) / 2 : 2f;
+					int xc = (int)Mathf.Floor((float)(this.position.width) / (ts.tileWidth + 10f));
+					float startx = _tileViewHeightRequired < (this.position.height - (lr.y + lr.height)) ? (this.position.width - 30f - xc * (ts.tileWidth + 6f)) / 2 : 2f;
 					float xf = startx;
 					float yf = 10f;
 					int cx = 0;
@@ -166,14 +165,14 @@ class TileMapEditor: EditorWindow {
 							Rect current_rect = new Rect(xf, yf, ts.tileWidth, ts.tileHeight);
 							GUI.DrawTextureWithTexCoords(current_rect,
 							                             ts.texture,
-							                             ts.getTexRect(i, j));
+							                             ts.GetTexRect(i, j));
 							
 							if(Event.current.type == EventType.MouseDown &&
 							   Event.current.button == 0) {
 								if(current_rect.Contains(Event.current.mousePosition)) {
 									selectedTileX = i;
 									selectedTileY = j;
-									ts.getTileInfo(i, j).direction = 0;
+									ts.GetTileInfo(i, j).direction = 0;
 									this.Repaint();
 								}
 							}

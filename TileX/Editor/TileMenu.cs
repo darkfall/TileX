@@ -5,7 +5,7 @@ class TileMenu {
 
 	[MenuItem("TileX/Tile Editor", false, 1)]
 	static void OpenTileEditor() {
-		TileMapEditor.Show();
+		TileMapEditor.Create();
 	}
 
 	[MenuItem("TileX/Create TileMap", false, 2)]
@@ -15,5 +15,10 @@ class TileMenu {
 			obj.AddComponent<TileMap>();
 			TileMapEditor.Get ().OnSelectionChange();
 		}
+	}
+
+	[MenuItem("TileX/Create TileMap", true)]
+	static bool ValidateCreateTileMap() {
+		return Selection.activeGameObject != null;
 	}
 }

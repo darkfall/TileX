@@ -1,21 +1,19 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
 class TileCamera: MonoBehaviour {
 
-	public TileMap tileMap;
-	public Camera  camera;
-	public PlayerController player;
-	public Vector2 playerSize = new Vector2(0.32f, 0.32f);
+	public TileMap tileMap = null;
+	public GameObject centerObject = null;
 
 	public void LateUpdate() {
-		if(player != null && camera != null && tileMap != null) {
-			Vector3 pos = player.gameObject.transform.position;
+		if(centerObject != null && camera != null && tileMap != null) {
+			Vector3 pos = centerObject.transform.position;
 			Rect tileRect = tileMap.worldMapRect;
 
 			float orthoHeight = camera.orthographicSize;
 			float orthoWidth = orthoHeight * camera.aspect;
 
-			
 			tileRect.x += orthoWidth;
 			tileRect.y += orthoHeight;
 			tileRect.width -= orthoWidth * 2;
