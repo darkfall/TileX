@@ -14,11 +14,12 @@ class TileMenu {
 		if(obj != null) {
 			obj.AddComponent<TileMap>();
 			TileMapEditor.Get ().OnSelectionChange();
+		} else {
+			obj = new GameObject();
+			obj.name = "New Tilemap";
+			obj.AddComponent<TileMap>();
+			TileMapEditor.Get ().OnSelectionChange();
 		}
 	}
 
-	[MenuItem("TileX/Create TileMap", true)]
-	static bool ValidateCreateTileMap() {
-		return Selection.activeGameObject != null;
-	}
 }

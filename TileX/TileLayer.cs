@@ -130,5 +130,8 @@ public class TileLayer: MonoBehaviour {
 		return this.name;
 	}
 
+	#region editor
+	public bool editorExpanded;
+	#endregion
 
 }
