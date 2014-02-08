@@ -26,6 +26,7 @@ public class TileMap: MonoBehaviour {
 		l.parentMap = this;
 		l.layerType = t;
 		l.name = name;
+		l.sortingOrder = this.layers.Count;
 		l.Init(this.width, this.height);
 
 		this.layers.Add(l);

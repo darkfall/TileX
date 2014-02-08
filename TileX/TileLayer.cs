@@ -121,6 +121,15 @@ public class TileLayer: MonoBehaviour {
 		}
 	}
 
+	public void ApplySorting() {
+		Tile[] ptiles = this.gameObject.GetComponentsInChildren<Tile>();
+		foreach(Tile t in ptiles) {
+			SpriteRenderer sr = t.gameObject.GetComponent<SpriteRenderer>();
+			sr.sortingOrder = this.sortingOrder;
+			sr.sortingLayerID = this.sortingLayer;
+		}
+	}
+
 	public Tile GetTileAt(Vector3 pos) {
 		return this.GetTile((int)Mathf.Floor((pos.x) / parentMap.xStep),
 		                    (int)Mathf.Floor((pos.y ) / parentMap.yStep));

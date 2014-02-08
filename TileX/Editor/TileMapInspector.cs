@@ -77,9 +77,14 @@ class TileMapInspector: Editor {
 
 		if(layer.editorExpanded) {
 			layer.transparency = EditorGUILayout.Slider("Transparency", layer.transparency, 0f, 1f);
+
+			EditorGUI.BeginChangeCheck();
 			layer.sortingLayer = EditorGUILayout.Popup("Sorting Layer", layer.sortingLayer, TileGUIUtility.GetSortingLayerNames());
 			layer.sortingOrder = EditorGUILayout.IntField("Sorting Order", layer.sortingOrder);
-			
+			if(EditorGUI.EndChangeCheck()) {
+				layer.ApplySorting();
+			}
+
 			EditorGUILayout.Space();
 			layer.layerGroup = EditorGUILayout.IntField("Group Id", layer.layerGroup);
 			layer.layerTag = EditorGUILayout.TextField("Layer Tag", layer.layerTag);
